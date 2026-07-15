@@ -13,6 +13,7 @@ die() { printf "%s\n" "${RED}✗${NC} $*" >&2; exit 1; }
 
 CFG_DIR="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 SKILLS_DIR="$CFG_DIR/skills"
+AGENTS_DIR="$CFG_DIR/agent"
 GH_USER="Yulimfish"
 
 SKILLS=(
@@ -22,6 +23,13 @@ SKILLS=(
   memory-graph-ui
   tool-call-discipline
   memory-dream
+  swarm-cluster
+  post-task-audit
+)
+
+# Agent bundles: repos that ship one or more subagent md files into $AGENTS_DIR.
+AGENT_BUNDLES=(
+  opencode-swarm-agents
 )
 
 PLUGINS=(
@@ -38,7 +46,7 @@ command -v bun  >/dev/null || warn "bun not found — the doubao-shim plugin nee
 
 # --- dirs ----------------------------------------------------------------
 say "preparing $CFG_DIR"
-mkdir -p "$SKILLS_DIR"
+mkdir -p "$SKILLS_DIR" "$AGENTS_DIR"
 ok "config dir ready"
 
 # --- skills --------------------------------------------------------------
@@ -57,6 +65,23 @@ for s in "${SKILLS[@]}"; do
     git clone --depth=1 --quiet "$repo" "$dest"
   fi
   ok "$s"
+done
+
+# --- agent bundles -------------------------------------------------------
+for b in "${AGENT_BUNDLES[@]}"; do
+  tmp=$(mktemp -d)
+  say "installing agent bundle: $b"
+  git clone --depth=1 --quiet "https://github.com/$GH_USER/$b.git" "$tmp/$b"
+  if [[ -d "$tmp/$b/agent" ]]; then
+    # Copy without overwriting hand-edited local agent md files unnamed by us.
+    for f in "$tmp/$b/agent"/*.md; do
+      cp -f "$f" "$AGENTS_DIR/"
+    done
+    ok "$b (agent md files copied to $AGENTS_DIR)"
+  else
+    warn "$b has no agent/ dir — skipped"
+  fi
+  rm -rf "$tmp"
 done
 
 # --- plugins -------------------------------------------------------------
