@@ -10,6 +10,8 @@
 - 🖼  **UI-preview-first** —— 任何会移动 DOM 的改动前，先给 ASCII wireframe。
 - 🌙 **Memory Dream** —— 睡眠隐喻的手动碎片巩固。
 - ❓ **Clarify-before-act** —— 分支决策前一条消息拿到确认。
+- 🕸  **Swarm Cluster** —— 主 Agent 遇到复杂任务时自主拆解，并行 spawn 2-4 个 subagent（可指定不同 model：kimi / deepseek / glm / minimax），最后汇总。
+- 🔍 **Post-Task Audit** —— 任务完成后派出零上下文污染的 subagent 独立核查，必要时多维度并行开审（功能 / 合规 / 安全 / 意图对齐）。
 
 ## 内容清单
 
@@ -23,6 +25,9 @@
 | [`opencode-skill-memory-graph-ui`](https://github.com/Yulimfish/opencode-skill-memory-graph-ui) | 技能 | git clone |
 | [`opencode-skill-tool-call-discipline`](https://github.com/Yulimfish/opencode-skill-tool-call-discipline) | 技能 | git clone |
 | [`opencode-skill-memory-dream`](https://github.com/Yulimfish/opencode-skill-memory-dream) | 技能 | git clone |
+| [`opencode-skill-swarm-cluster`](https://github.com/Yulimfish/opencode-skill-swarm-cluster) | 技能 · 集群 | git clone |
+| [`opencode-skill-post-task-audit`](https://github.com/Yulimfish/opencode-skill-post-task-audit) | 技能 · 核查 | git clone |
+| [`opencode-swarm-agents`](https://github.com/Yulimfish/opencode-swarm-agents) | Agent 集 · 5 worker + 1 synth | git clone → agent/ |
 
 ## 一行安装
 
@@ -33,10 +38,11 @@ curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/i
 脚本会：
 
 1. 检查前置（opencode、bun、npm）。
-2. 把 6 个技能 clone 到 `~/.config/opencode/skills/`。
-3. 把两个插件 `npm install` 到 `~/.config/opencode/`。
-4. 打印你需要粘到 `opencode.jsonc` / `opencode-mem.jsonc` 的确切片段。
-5. 如果你打算用 doubao shim，提醒你设置 `ARK_KEY`。
+2. 把 8 个技能 clone 到 `~/.config/opencode/skills/`。
+3. 把 opencode-swarm-agents clone 出来，把里面的 6 个 agent md 复制到 `~/.config/opencode/agent/`（装完需要重启一次 opencode 让 Task 白名单识别）。
+4. 把两个插件 `npm install` 到 `~/.config/opencode/`。
+5. 打印你需要粘到 `opencode.jsonc` / `opencode-mem.jsonc` 的确切片段。
+6. 如果你打算用 doubao shim，提醒你设置 `ARK_KEY`。
 
 **全流程幂等** —— 反复跑没关系。
 
@@ -51,10 +57,17 @@ npm install opencode-codex-guardrails opencode-codex-doubao-shim
 # 技能
 mkdir -p ~/.config/opencode/skills
 for s in clarify-before-act ui-preview-first long-term-memory \
-         memory-graph-ui tool-call-discipline memory-dream; do
+         memory-graph-ui tool-call-discipline memory-dream \
+         swarm-cluster post-task-audit; do
   git clone --depth=1 "https://github.com/Yulimfish/opencode-skill-$s.git" \
     "$HOME/.config/opencode/skills/$s"
 done
+
+# Agent bundle：5 个 worker + 1 个 synth 的 md 定义（可选，供 swarm-cluster 用）
+mkdir -p ~/.config/opencode/agent
+git clone --depth=1 https://github.com/Yulimfish/opencode-swarm-agents.git /tmp/swarm-agents \
+  && cp /tmp/swarm-agents/agent/*.md ~/.config/opencode/agent/ \
+  && rm -rf /tmp/swarm-agents
 ```
 
 然后编辑 `~/.config/opencode/opencode.jsonc`：
@@ -110,7 +123,7 @@ Recalled 2 relevant memories （依据 memory mem_… · 2026-07-15）
 curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/uninstall.sh | bash
 ```
 
-或者手动：`npm uninstall opencode-codex-*`，然后 `rm -rf ~/.config/opencode/skills/{clarify-before-act,ui-preview-first,long-term-memory,memory-graph-ui,tool-call-discipline,memory-dream}`。
+或者手动：`npm uninstall opencode-codex-*`，然后 `rm -rf ~/.config/opencode/skills/{clarify-before-act,ui-preview-first,long-term-memory,memory-graph-ui,tool-call-discipline,memory-dream,swarm-cluster,post-task-audit}`，再 `rm -f ~/.config/opencode/agent/swarm-*.md`。
 
 ## 许可
 
