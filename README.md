@@ -12,6 +12,7 @@
 - ❓ **Clarify-before-act** —— 分支决策前一条消息拿到确认。
 - 🕸  **Swarm Cluster** —— 主 Agent 遇到复杂任务时自主拆解，并行 spawn 2-4 个 subagent（可指定不同 model：kimi / deepseek / glm / minimax），最后汇总。
 - 🔍 **Post-Task Audit** —— 任务完成后派出零上下文污染的 subagent 独立核查，必要时多维度并行开审（功能 / 合规 / 安全 / 意图对齐）。
+- 🖼️ **Screenshot-to-UI** —— 给张参考图（截图 / Figma 导出 / 手绘稿 / URL），走 5 阶段流水线（analyze → HTML plan → styled build → visual diff → iterate）做像素级 1:1 复刻。
 
 ## 内容清单
 
@@ -27,6 +28,7 @@
 | [`opencode-skill-memory-dream`](https://github.com/Yulimfish/opencode-skill-memory-dream) | 技能 | git clone |
 | [`opencode-skill-swarm-cluster`](https://github.com/Yulimfish/opencode-skill-swarm-cluster) | 技能 · 集群 | git clone |
 | [`opencode-skill-post-task-audit`](https://github.com/Yulimfish/opencode-skill-post-task-audit) | 技能 · 核查 | git clone |
+| [`opencode-skill-screenshot-to-ui`](https://github.com/Yulimfish/opencode-skill-screenshot-to-ui) | 技能 · 1:1 UI 复刻 | git clone |
 | [`opencode-swarm-agents`](https://github.com/Yulimfish/opencode-swarm-agents) | Agent 集 · 5 worker + 1 synth | git clone → agent/ |
 
 ## 一行安装
@@ -38,7 +40,7 @@ curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/i
 脚本会：
 
 1. 检查前置（opencode、bun、npm）。
-2. 把 8 个技能 clone 到 `~/.config/opencode/skills/`。
+2. 把 9 个技能 clone 到 `~/.config/opencode/skills/`。
 3. 把 opencode-swarm-agents clone 出来，把里面的 6 个 agent md 复制到 `~/.config/opencode/agent/`（装完需要重启一次 opencode 让 Task 白名单识别）。
 4. 把两个插件 `npm install` 到 `~/.config/opencode/`。
 5. 打印你需要粘到 `opencode.jsonc` / `opencode-mem.jsonc` 的确切片段。
@@ -58,7 +60,7 @@ npm install opencode-codex-guardrails opencode-codex-doubao-shim
 mkdir -p ~/.config/opencode/skills
 for s in clarify-before-act ui-preview-first long-term-memory \
          memory-graph-ui tool-call-discipline memory-dream \
-         swarm-cluster post-task-audit; do
+         swarm-cluster post-task-audit screenshot-to-ui; do
   git clone --depth=1 "https://github.com/Yulimfish/opencode-skill-$s.git" \
     "$HOME/.config/opencode/skills/$s"
 done
@@ -123,7 +125,7 @@ Recalled 2 relevant memories （依据 memory mem_… · 2026-07-15）
 curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/uninstall.sh | bash
 ```
 
-或者手动：`npm uninstall opencode-codex-*`，然后 `rm -rf ~/.config/opencode/skills/{clarify-before-act,ui-preview-first,long-term-memory,memory-graph-ui,tool-call-discipline,memory-dream,swarm-cluster,post-task-audit}`，再 `rm -f ~/.config/opencode/agent/swarm-*.md`。
+或者手动：`npm uninstall opencode-codex-*`，然后 `rm -rf ~/.config/opencode/skills/{clarify-before-act,ui-preview-first,long-term-memory,memory-graph-ui,tool-call-discipline,memory-dream,swarm-cluster,post-task-audit,screenshot-to-ui}`，再 `rm -f ~/.config/opencode/agent/swarm-*.md`。
 
 ## 许可
 

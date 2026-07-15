@@ -15,6 +15,7 @@ SKILLS=(
   memory-dream
   swarm-cluster
   post-task-audit
+  screenshot-to-ui
 )
 
 # Agent md files installed by opencode-swarm-agents bundle.

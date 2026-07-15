@@ -25,6 +25,7 @@ SKILLS=(
   memory-dream
   swarm-cluster
   post-task-audit
+  screenshot-to-ui
 )
 
 # Agent bundles: repos that ship one or more subagent md files into $AGENTS_DIR.
