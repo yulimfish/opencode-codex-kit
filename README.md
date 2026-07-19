@@ -7,6 +7,7 @@
 - 🛡  **Guardrails 护栏** —— 硬拦 `rm -rf /`、fork bomb、`curl \| sh`；对 `git push --force`、`drop database`、`sudo` 弹提示；前端文件上自动带 UI 预览提醒。
 - 🧠 **Memory 记忆** —— 通过 [`opencode-mem`](https://www.npmjs.com/package/opencode-mem) 提供的语义长时记忆，向量走本地 OpenAI 兼容 shim 转发到火山方舟 `doubao-embedding-vision-250615`（2048 维）。
 - 🎯 **Discipline 纪律** —— 五条硬规则，阻止 agent 在 30 行分片重读、串行化本该并行的调用、shell 工具乱选上浪费轮次。
+- 🔎 **Tool Search 动态工具加载** —— 参考 Kimi K3 的 tool-search 模式；把 MCP 等噪声工具的描述折叠成 stub，模型按需 `tool_search("...")` 揭示，命中的工具本 session 永久可见。省 token、聚焦注意力。
 - 🖼  **UI-preview-first** —— 任何会移动 DOM 的改动前，先给 ASCII wireframe。
 - 🌙 **Memory Dream** —— 睡眠隐喻的手动碎片巩固。
 - ❓ **Clarify-before-act** —— 分支决策前一条消息拿到确认。
@@ -20,6 +21,7 @@
 | --- | --- | --- |
 | [`opencode-codex-guardrails`](https://github.com/Yulimfish/opencode-codex-guardrails) | 插件 · 安全 | `npm i opencode-codex-guardrails` |
 | [`opencode-codex-doubao-shim`](https://github.com/Yulimfish/opencode-codex-doubao-shim) | 插件 · embedding 代理 | `npm i opencode-codex-doubao-shim` |
+| [`opencode-tool-search`](https://github.com/Yulimfish/opencode-tool-search) | 插件 · 动态工具加载 | `npm i opencode-tool-search` |
 | [`opencode-skill-clarify-before-act`](https://github.com/Yulimfish/opencode-skill-clarify-before-act) | 技能 | git clone |
 | [`opencode-skill-ui-preview-first`](https://github.com/Yulimfish/opencode-skill-ui-preview-first) | 技能 | git clone |
 | [`opencode-skill-long-term-memory`](https://github.com/Yulimfish/opencode-skill-long-term-memory) | 技能 | git clone |
@@ -54,7 +56,7 @@ curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/i
 
 ```bash
 # 插件
-npm install opencode-codex-guardrails opencode-codex-doubao-shim
+npm install opencode-codex-guardrails opencode-codex-doubao-shim opencode-tool-search
 
 # 技能
 mkdir -p ~/.config/opencode/skills
@@ -79,6 +81,7 @@ git clone --depth=1 https://github.com/Yulimfish/opencode-swarm-agents.git /tmp/
   "plugin": [
     "opencode-codex-guardrails",
     "opencode-codex-doubao-shim",
+    "opencode-tool-search",
     "opencode-mem"
   ]
 }

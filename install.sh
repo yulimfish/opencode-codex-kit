@@ -36,6 +36,7 @@ AGENT_BUNDLES=(
 PLUGINS=(
   opencode-codex-guardrails
   opencode-codex-doubao-shim
+  opencode-tool-search
 )
 
 # --- prereq --------------------------------------------------------------
@@ -109,6 +110,7 @@ Next steps:
      "plugin": [
        "opencode-codex-guardrails",
        "opencode-codex-doubao-shim",
+       "opencode-tool-search",
        "opencode-mem"
      ]
    }
