@@ -46,6 +46,6 @@ done
 
 echo "==> removing plugins"
 cd "$CFG_DIR"
-npm uninstall --silent opencode-codex-guardrails opencode-codex-doubao-shim opencode-tool-search 2>/dev/null || true
+npm uninstall --silent opencode-codex-guardrails opencode-codex-doubao-shim @yulimfish/opencode-tool-search 2>/dev/null || true
 
 echo "Done. Remember to edit opencode.jsonc to remove plugin entries and restart opencode."

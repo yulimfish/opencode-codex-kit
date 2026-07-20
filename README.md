@@ -21,7 +21,7 @@
 | --- | --- | --- |
 | [`opencode-codex-guardrails`](https://github.com/Yulimfish/opencode-codex-guardrails) | 插件 · 安全 | `npm i opencode-codex-guardrails` |
 | [`opencode-codex-doubao-shim`](https://github.com/Yulimfish/opencode-codex-doubao-shim) | 插件 · embedding 代理 | `npm i opencode-codex-doubao-shim` |
-| [`opencode-tool-search`](https://github.com/Yulimfish/opencode-tool-search) | 插件 · 动态工具加载 | `npm i opencode-tool-search` |
+| [`@yulimfish/opencode-tool-search`](https://github.com/Yulimfish/opencode-tool-search) | 插件 · 动态工具加载 | `npm i @yulimfish/opencode-tool-search` |
 | [`opencode-skill-clarify-before-act`](https://github.com/Yulimfish/opencode-skill-clarify-before-act) | 技能 | git clone |
 | [`opencode-skill-ui-preview-first`](https://github.com/Yulimfish/opencode-skill-ui-preview-first) | 技能 | git clone |
 | [`opencode-skill-long-term-memory`](https://github.com/Yulimfish/opencode-skill-long-term-memory) | 技能 | git clone |
@@ -56,7 +56,7 @@ curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/i
 
 ```bash
 # 插件
-npm install opencode-codex-guardrails opencode-codex-doubao-shim opencode-tool-search
+npm install opencode-codex-guardrails opencode-codex-doubao-shim @yulimfish/opencode-tool-search
 
 # 技能
 mkdir -p ~/.config/opencode/skills
@@ -81,7 +81,7 @@ git clone --depth=1 https://github.com/Yulimfish/opencode-swarm-agents.git /tmp/
   "plugin": [
     "opencode-codex-guardrails",
     "opencode-codex-doubao-shim",
-    "opencode-tool-search",
+    "@yulimfish/opencode-tool-search",
     "opencode-mem"
   ]
 }
