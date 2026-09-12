@@ -4,7 +4,7 @@ set -euo pipefail
 
 CFG_DIR="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 SKILLS_DIR="$CFG_DIR/skills"
-AGENTS_DIR="$CFG_DIR/agent"
+AGENTS_DIR="$CFG_DIR/agents"
 
 SKILLS=(
   clarify-before-act
@@ -26,6 +26,7 @@ AGENT_FILES=(
   swarm-worker-glm.md
   swarm-worker-minimax.md
   swarm-synth.md
+  goal-verify.md
 )
 
 echo "==> removing skills"

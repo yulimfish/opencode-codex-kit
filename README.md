@@ -31,7 +31,7 @@
 | [`opencode-skill-swarm-cluster`](https://github.com/Yulimfish/opencode-skill-swarm-cluster) | 技能 · 集群 | git clone |
 | [`opencode-skill-post-task-audit`](https://github.com/Yulimfish/opencode-skill-post-task-audit) | 技能 · 核查 | git clone |
 | [`opencode-skill-screenshot-to-ui`](https://github.com/Yulimfish/opencode-skill-screenshot-to-ui) | 技能 · 1:1 UI 复刻 | git clone |
-| [`opencode-swarm-agents`](https://github.com/Yulimfish/opencode-swarm-agents) | Agent 集 · 5 worker + 1 synth | git clone → agent/ |
+| [`opencode-swarm-agents`](https://github.com/Yulimfish/opencode-swarm-agents) | Agent 集 · 5 worker + 1 synth + 1 auditor | git clone → agents/ |
 
 ## 一行安装
 
@@ -43,7 +43,7 @@ curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/i
 
 1. 检查前置（opencode、bun、npm）。
 2. 把 9 个技能 clone 到 `~/.config/opencode/skills/`。
-3. 把 opencode-swarm-agents clone 出来，把里面的 6 个 agent md 复制到 `~/.config/opencode/agent/`（装完需要重启一次 opencode 让 Task 白名单识别）。
+3. 把 opencode-swarm-agents clone 出来，把里面的 7 个 agent md 复制到 `~/.config/opencode/agents/`（装完需要重启一次 opencode 让 Task 白名单识别）。
 4. 把两个插件 `npm install` 到 `~/.config/opencode/`。
 5. 打印你需要粘到 `opencode.jsonc` / `opencode-mem.jsonc` 的确切片段。
 6. 如果你打算用 doubao shim，提醒你设置 `ARK_KEY`。
@@ -67,10 +67,10 @@ for s in clarify-before-act ui-preview-first long-term-memory \
     "$HOME/.config/opencode/skills/$s"
 done
 
-# Agent bundle：5 个 worker + 1 个 synth 的 md 定义（可选，供 swarm-cluster 用）
-mkdir -p ~/.config/opencode/agent
+# Agent bundle：5 个 worker + 1 个 synth + 1 个审计员的 md 定义（可选，供 swarm-cluster / post-task-audit 用）
+mkdir -p ~/.config/opencode/agents
 git clone --depth=1 https://github.com/Yulimfish/opencode-swarm-agents.git /tmp/swarm-agents \
-  && cp /tmp/swarm-agents/agent/*.md ~/.config/opencode/agent/ \
+  && cp /tmp/swarm-agents/agent/*.md ~/.config/opencode/agents/ \
   && rm -rf /tmp/swarm-agents
 ```
 
@@ -128,7 +128,7 @@ Recalled 2 relevant memories （依据 memory mem_… · 2026-07-15）
 curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/uninstall.sh | bash
 ```
 
-或者手动：`npm uninstall opencode-codex-*`，然后 `rm -rf ~/.config/opencode/skills/{clarify-before-act,ui-preview-first,long-term-memory,memory-graph-ui,tool-call-discipline,memory-dream,swarm-cluster,post-task-audit,screenshot-to-ui}`，再 `rm -f ~/.config/opencode/agent/swarm-*.md`。
+或者手动：`npm uninstall opencode-codex-*`，然后 `rm -rf ~/.config/opencode/skills/{clarify-before-act,ui-preview-first,long-term-memory,memory-graph-ui,tool-call-discipline,memory-dream,swarm-cluster,post-task-audit,screenshot-to-ui}`，再 `rm -f ~/.config/opencode/agents/swarm-*.md ~/.config/opencode/agents/goal-verify.md`。
 
 ## 许可
 
