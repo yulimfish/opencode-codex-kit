@@ -33,6 +33,9 @@ AGENT_BUNDLES=(
   opencode-swarm-agents
 )
 
+# Report-only Dream agent, read-only data interface, and review template.
+MEMORY_EVOLUTION_REPO="https://github.com/Yulimfish/opencode-memory-evolution.git"
+
 PLUGINS=(
   opencode-codex-guardrails
   @yulimfish/opencode-tool-search
@@ -66,6 +69,18 @@ for s in "${SKILLS[@]}"; do
   fi
   ok "$s"
 done
+
+# --- memory evolution -----------------------------------------------------
+tmp=$(mktemp -d)
+say "installing memory evolution assets"
+git clone --depth=1 --quiet "$MEMORY_EVOLUTION_REPO" "$tmp/opencode-memory-evolution"
+cp -f "$tmp/opencode-memory-evolution/agents/memory-dream.md" "$AGENTS_DIR/"
+mkdir -p "$CFG_DIR/memory/bin" "$CFG_DIR/memory/dream"
+cp -f "$tmp/opencode-memory-evolution/bin/dreamctl" "$CFG_DIR/memory/bin/"
+chmod +x "$CFG_DIR/memory/bin/dreamctl"
+cp -f "$tmp/opencode-memory-evolution/templates/dream/TEMPLATE.md" "$CFG_DIR/memory/dream/"
+rm -rf "$tmp"
+ok "memory evolution assets installed (database untouched)"
 
 # --- agent bundles -------------------------------------------------------
 for b in "${AGENT_BUNDLES[@]}"; do
@@ -123,8 +138,11 @@ Next steps:
    }
 
 3. Restart opencode. Look for:
-     [codex-guardrails] armed
-     [opencode-mem] loaded …
+      [codex-guardrails] armed
+      [opencode-mem] loaded …
+
+4. Optional: create the OpenChamber nightly Dream task from:
+   https://github.com/$GH_USER/opencode-memory-evolution/blob/main/examples/openchamber-dream-schedule.json
 
 Full docs: https://github.com/$GH_USER/opencode-codex-kit
 EOF

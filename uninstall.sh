@@ -29,6 +29,7 @@ AGENT_FILES=(
   swarm-worker-deepseek.md
   swarm-worker-glm.md
   swarm-worker-minimax.md
+  memory-dream.md
 )
 
 echo "==> removing skills"
@@ -38,6 +39,9 @@ for s in "${SKILLS[@]}"; do
     echo "  removed $s"
   fi
 done
+
+echo "==> removing memory evolution helper files (keeping reports and data)"
+rm -f "$CFG_DIR/memory/bin/dreamctl" "$CFG_DIR/memory/dream/TEMPLATE.md"
 
 echo "==> removing swarm agent md files"
 for f in "${AGENT_FILES[@]}"; do
