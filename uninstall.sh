@@ -5,51 +5,41 @@ set -euo pipefail
 CFG_DIR="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 SKILLS_DIR="$CFG_DIR/skills"
 AGENTS_DIR="$CFG_DIR/agents"
-
-SKILLS=(
-  clarify-before-act
-  ui-preview-first
-  long-term-memory
-  memory-graph-ui
-  tool-call-discipline
-  memory-dream
-  swarm-cluster
-  post-task-audit
-  screenshot-to-ui
-)
-
-# Agent md files installed by opencode-swarm-agents bundle.
-# swarm-worker-{kimi,deepseek,glm,minimax} are legacy names, kept here so
-# older installs get cleaned up too.
-AGENT_FILES=(
-  swarm-worker.md
-  swarm-synth.md
-  goal-verify.md
-  swarm-worker-kimi.md
-  swarm-worker-deepseek.md
-  swarm-worker-glm.md
-  swarm-worker-minimax.md
-  memory-dream.md
-)
+MANAGED_MANIFEST="$CFG_DIR/.opencode-codex-kit-managed"
+SKILL_MANIFEST="$CFG_DIR/.opencode-codex-kit-skills"
 
 echo "==> removing skills"
-for s in "${SKILLS[@]}"; do
-  if [[ -d "$SKILLS_DIR/$s" ]]; then
-    rm -rf "$SKILLS_DIR/$s"
-    echo "  removed $s"
-  fi
-done
+if [[ -f "$SKILL_MANIFEST" ]]; then
+  while IFS= read -r dest; do
+    [[ -n "$dest" && -d "$dest" ]] || continue
+    if [[ -n "$(git -C "$dest" status --porcelain 2>/dev/null)" ]]; then
+      echo "  preserved modified skill: $dest"
+    else
+      rm -rf "$dest"
+      echo "  removed $dest"
+    fi
+  done < "$SKILL_MANIFEST"
+  rm -f "$SKILL_MANIFEST"
+else
+  echo "  no ownership manifest — preserving existing skill checkouts"
+fi
 
 echo "==> removing memory evolution helper files (keeping reports and data)"
-rm -f "$CFG_DIR/memory/bin/dreamctl" "$CFG_DIR/memory/dream/TEMPLATE.md"
-
-echo "==> removing swarm agent md files"
-for f in "${AGENT_FILES[@]}"; do
-  if [[ -f "$AGENTS_DIR/$f" ]]; then
-    rm -f "$AGENTS_DIR/$f"
-    echo "  removed agents/$f"
-  fi
-done
+if [[ -f "$MANAGED_MANIFEST" ]]; then
+  while IFS=$'\t' read -r path checksum; do
+    [[ -n "$path" && -n "$checksum" && -f "$path" && ! -L "$path" ]] || continue
+    current=$(shasum -a 256 "$path" | cut -d ' ' -f 1)
+    if [[ "$current" == "$checksum" ]]; then
+      rm -f "$path"
+      echo "  removed $path"
+    else
+      echo "  preserved modified file: $path"
+    fi
+  done < "$MANAGED_MANIFEST"
+  rm -f "$MANAGED_MANIFEST"
+else
+  echo "  no ownership manifest — preserving existing agent/helper files"
+fi
 
 echo "==> removing plugins"
 cd "$CFG_DIR"

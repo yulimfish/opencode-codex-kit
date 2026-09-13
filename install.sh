@@ -14,6 +14,8 @@ die() { printf "%s\n" "${RED}✗${NC} $*" >&2; exit 1; }
 CFG_DIR="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 SKILLS_DIR="$CFG_DIR/skills"
 AGENTS_DIR="$CFG_DIR/agents"
+MANAGED_MANIFEST="$CFG_DIR/.opencode-codex-kit-managed"
+SKILL_MANIFEST="$CFG_DIR/.opencode-codex-kit-skills"
 GH_USER="Yulimfish"
 
 SKILLS=(
@@ -47,9 +49,26 @@ command -v git  >/dev/null || die "git not found. Install git first."
 command -v npm  >/dev/null || die "npm not found. Install Node.js (>=18) first."
 command -v curl >/dev/null || die "curl not found."
 
+install_managed() {
+  local source="$1" target="$2"
+  if [[ -e "$target" ]]; then
+    if cmp -s "$source" "$target"; then
+      warn "$target already exists unchanged — leaving it in place"
+    else
+      warn "$target already exists — leaving the local file untouched"
+    fi
+    return 1
+  fi
+  mkdir -p "$(dirname "$target")"
+  cp "$source" "$target"
+  printf '%s\t%s\n' "$target" "$(shasum -a 256 "$target" | cut -d ' ' -f 1)" >> "$MANAGED_MANIFEST"
+  return 0
+}
+
 # --- dirs ----------------------------------------------------------------
 say "preparing $CFG_DIR"
 mkdir -p "$SKILLS_DIR" "$AGENTS_DIR"
+touch "$MANAGED_MANIFEST" "$SKILL_MANIFEST"
 ok "config dir ready"
 
 # --- skills --------------------------------------------------------------
@@ -58,7 +77,12 @@ for s in "${SKILLS[@]}"; do
   repo="https://github.com/$GH_USER/opencode-skill-$s.git"
   if [[ -d "$dest/.git" ]]; then
     say "updating skill: $s"
-    git -C "$dest" pull --ff-only --quiet || warn "pull failed for $s (keeping local copy)"
+    if git -C "$dest" pull --ff-only --quiet; then
+      ok "$s (updated)"
+    else
+      warn "$s pull failed — keeping the local copy; verify it manually"
+    fi
+    continue
   else
     say "installing skill: $s"
     if [[ -e "$dest" ]]; then
@@ -66,19 +90,18 @@ for s in "${SKILLS[@]}"; do
       mv "$dest" "$dest.bak.$(date +%s)"
     fi
     git clone --depth=1 --quiet "$repo" "$dest"
+    printf '%s\n' "$dest" >> "$SKILL_MANIFEST"
   fi
-  ok "$s"
+  ok "$s (installed)"
 done
 
 # --- memory evolution -----------------------------------------------------
 tmp=$(mktemp -d)
 say "installing memory evolution assets"
 git clone --depth=1 --quiet "$MEMORY_EVOLUTION_REPO" "$tmp/opencode-memory-evolution"
-cp -f "$tmp/opencode-memory-evolution/agents/memory-dream.md" "$AGENTS_DIR/"
-mkdir -p "$CFG_DIR/memory/bin" "$CFG_DIR/memory/dream"
-cp -f "$tmp/opencode-memory-evolution/bin/dreamctl" "$CFG_DIR/memory/bin/"
-chmod +x "$CFG_DIR/memory/bin/dreamctl"
-cp -f "$tmp/opencode-memory-evolution/templates/dream/TEMPLATE.md" "$CFG_DIR/memory/dream/"
+install_managed "$tmp/opencode-memory-evolution/agents/memory-dream.md" "$AGENTS_DIR/memory-dream.md" || true
+install_managed "$tmp/opencode-memory-evolution/bin/dreamctl" "$CFG_DIR/memory/bin/dreamctl" && chmod +x "$CFG_DIR/memory/bin/dreamctl" || true
+install_managed "$tmp/opencode-memory-evolution/templates/dream/TEMPLATE.md" "$CFG_DIR/memory/dream/TEMPLATE.md" || true
 rm -rf "$tmp"
 ok "memory evolution assets installed (database untouched)"
 
@@ -90,7 +113,7 @@ for b in "${AGENT_BUNDLES[@]}"; do
   if [[ -d "$tmp/$b/agents" ]]; then
     # Copy without overwriting hand-edited local agent md files unnamed by us.
     for f in "$tmp/$b/agents"/*.md; do
-      cp -f "$f" "$AGENTS_DIR/"
+      install_managed "$f" "$AGENTS_DIR/$(basename "$f")" || true
     done
     ok "$b (agent md files copied to $AGENTS_DIR)"
   else

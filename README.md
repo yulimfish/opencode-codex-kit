@@ -139,7 +139,7 @@ Recalled 2 relevant memories （依据 memory mem_… · 2026-07-15）
 curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/uninstall.sh | bash
 ```
 
-或者手动：`npm uninstall opencode-codex-*`，然后 `rm -rf ~/.config/opencode/skills/{clarify-before-act,ui-preview-first,long-term-memory,memory-graph-ui,tool-call-discipline,memory-dream,swarm-cluster,post-task-audit,screenshot-to-ui}`，再 `rm -f ~/.config/opencode/agents/swarm-*.md ~/.config/opencode/agents/goal-verify.md ~/.config/opencode/agents/memory-dream.md ~/.config/opencode/memory/bin/dreamctl ~/.config/opencode/memory/dream/TEMPLATE.md`（不会删除 Dream 报告、数据库或备份）。
+手动卸载不推荐：安装器会记录它实际创建的文件，只删除内容未被修改的自有文件，并保留用户已有或改过的 skill/agent。无论哪种方式，都不会删除 Dream 报告、数据库或备份。
 
 ## 许可
 
