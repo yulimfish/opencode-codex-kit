@@ -40,7 +40,7 @@ curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/i
 
 脚本会：
 
-1. 检查前置（opencode、npm）。
+1. 检查前置（git、npm、curl）。
 2. 把 9 个技能 clone 到 `~/.config/opencode/skills/`。
 3. 把 opencode-swarm-agents clone 出来，把里面的 3 个 agent md 复制到 `~/.config/opencode/agents/`（装完需要重启一次 opencode 让 Task 白名单识别）。
 4. 把插件 `npm install` 到 `~/.config/opencode/`。
