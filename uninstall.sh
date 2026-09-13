@@ -19,14 +19,16 @@ SKILLS=(
 )
 
 # Agent md files installed by opencode-swarm-agents bundle.
+# swarm-worker-{kimi,deepseek,glm,minimax} are legacy names, kept here so
+# older installs get cleaned up too.
 AGENT_FILES=(
   swarm-worker.md
+  swarm-synth.md
+  goal-verify.md
   swarm-worker-kimi.md
   swarm-worker-deepseek.md
   swarm-worker-glm.md
   swarm-worker-minimax.md
-  swarm-synth.md
-  goal-verify.md
 )
 
 echo "==> removing skills"
@@ -41,12 +43,12 @@ echo "==> removing swarm agent md files"
 for f in "${AGENT_FILES[@]}"; do
   if [[ -f "$AGENTS_DIR/$f" ]]; then
     rm -f "$AGENTS_DIR/$f"
-    echo "  removed agent/$f"
+    echo "  removed agents/$f"
   fi
 done
 
 echo "==> removing plugins"
 cd "$CFG_DIR"
-npm uninstall --silent opencode-codex-guardrails opencode-codex-doubao-shim @yulimfish/opencode-tool-search 2>/dev/null || true
+npm uninstall --silent opencode-codex-guardrails @yulimfish/opencode-tool-search 2>/dev/null || true
 
 echo "Done. Remember to edit opencode.jsonc to remove plugin entries and restart opencode."

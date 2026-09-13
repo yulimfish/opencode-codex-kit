@@ -35,7 +35,6 @@ AGENT_BUNDLES=(
 
 PLUGINS=(
   opencode-codex-guardrails
-  opencode-codex-doubao-shim
   @yulimfish/opencode-tool-search
 )
 
@@ -44,7 +43,6 @@ say "checking prerequisites"
 command -v git  >/dev/null || die "git not found. Install git first."
 command -v npm  >/dev/null || die "npm not found. Install Node.js (>=18) first."
 command -v curl >/dev/null || die "curl not found."
-command -v bun  >/dev/null || warn "bun not found — the doubao-shim plugin needs bun to run. Install via https://bun.sh"
 
 # --- dirs ----------------------------------------------------------------
 say "preparing $CFG_DIR"
@@ -74,14 +72,14 @@ for b in "${AGENT_BUNDLES[@]}"; do
   tmp=$(mktemp -d)
   say "installing agent bundle: $b"
   git clone --depth=1 --quiet "https://github.com/$GH_USER/$b.git" "$tmp/$b"
-  if [[ -d "$tmp/$b/agent" ]]; then
+  if [[ -d "$tmp/$b/agents" ]]; then
     # Copy without overwriting hand-edited local agent md files unnamed by us.
-    for f in "$tmp/$b/agent"/*.md; do
+    for f in "$tmp/$b/agents"/*.md; do
       cp -f "$f" "$AGENTS_DIR/"
     done
     ok "$b (agent md files copied to $AGENTS_DIR)"
   else
-    warn "$b has no agent/ dir — skipped"
+    warn "$b has no agents/ dir — skipped"
   fi
   rm -rf "$tmp"
 done
@@ -109,29 +107,22 @@ Next steps:
    {
      "plugin": [
        "opencode-codex-guardrails",
-       "opencode-codex-doubao-shim",
        "@yulimfish/opencode-tool-search",
        "opencode-mem"
      ]
    }
 
-2. Export your Volcengine Ark key (needed by doubao-shim):
-
-   ${YELLOW}export ARK_KEY="ark-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-xxxxx"${NC}
-
-   Get one at https://console.volcengine.com/ark
-
-3. Add memory config to ${YELLOW}$CFG_DIR/opencode-mem.jsonc${NC}:
+2. Add memory config to ${YELLOW}$CFG_DIR/opencode-mem.jsonc${NC}
+   (embedding backend: Alibaba Cloud Model Studio / MaaS, qwen3.7-text-embedding):
 
    {
-     "embeddingApiUrl": "http://127.0.0.1:4748/v1",
-     "embeddingApiKey": "not-used-shim-ignores",
-     "embeddingModel": "doubao-embedding-vision-250615",
-     "embeddingDimensions": 2048
+     "embeddingApiUrl": "https://<your-endpoint>.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+     "embeddingApiKey": "<YOUR_API_KEY>",
+     "embeddingModel": "qwen3.7-text-embedding",
+     "embeddingDimensions": 1024
    }
 
-4. Restart opencode. Look for:
-     [codex-doubao-shim] health OK at :4748
+3. Restart opencode. Look for:
      [codex-guardrails] armed
      [opencode-mem] loaded …
 

@@ -5,14 +5,14 @@
 一行安装脚本会拉一组精心挑选的插件 + 技能，装完之后你会得到：
 
 - 🛡  **Guardrails 护栏** —— 硬拦 `rm -rf /`、fork bomb、`curl \| sh`；对 `git push --force`、`drop database`、`sudo` 弹提示；前端文件上自动带 UI 预览提醒。
-- 🧠 **Memory 记忆** —— 通过 [`opencode-mem`](https://www.npmjs.com/package/opencode-mem) 提供的语义长时记忆，向量走本地 OpenAI 兼容 shim 转发到火山方舟 `doubao-embedding-vision-250615`（2048 维）。
+- 🧠 **Memory 记忆** —— 通过 [`opencode-mem`](https://www.npmjs.com/package/opencode-mem) 提供的语义长时记忆，向量由阿里云百炼 MaaS（`qwen3.7-text-embedding`，1024 维）直接生成。
 - 🎯 **Discipline 纪律** —— 五条硬规则，阻止 agent 在 30 行分片重读、串行化本该并行的调用、shell 工具乱选上浪费轮次。
 - 🔎 **Tool Search 动态工具加载** —— 参考 Kimi K3 的 tool-search 模式；把 MCP 等噪声工具的描述折叠成 stub，模型按需 `tool_search("...")` 揭示，命中的工具本 session 永久可见。省 token、聚焦注意力。
 - 🖼  **UI-preview-first** —— 任何会移动 DOM 的改动前，先给 ASCII wireframe。
-- 🌙 **Memory Dream** —— 睡眠隐喻的手动碎片巩固。
+- 🌙 **Memory Dream** —— 睡眠隐喻的碎片巩固：五阶段（Doze → Cluster → Consolidate → NREM 衰减评分 → REM 清理），支持「清理 / 遗忘」快路径。
 - ❓ **Clarify-before-act** —— 分支决策前一条消息拿到确认。
-- 🕸  **Swarm Cluster** —— 主 Agent 遇到复杂任务时自主拆解，并行 spawn 2-4 个 subagent（可指定不同 model：kimi / deepseek / glm / minimax），最后汇总。
-- 🔍 **Post-Task Audit** —— 任务完成后派出零上下文污染的 subagent 独立核查，必要时多维度并行开审（功能 / 合规 / 安全 / 意图对齐）。
+- 🕸  **Swarm Cluster** —— 主 Agent 遇到复杂任务时自主拆解，并行 spawn 2-4 个 subagent（默认继承主模型；要指定模型就自建 `agents/swarm-worker-<name>.md`），最后汇总。
+- 🔍 **Post-Task Audit** —— 任务完成后派出零上下文污染的 subagent 独立核查（默认审计员 `goal-verify`），必要时多维度并行开审（功能 / 合规 / 安全 / 意图对齐）。
 - 🖼️ **Screenshot-to-UI** —— 给张参考图（截图 / Figma 导出 / 手绘稿 / URL），走 5 阶段流水线（analyze → HTML plan → styled build → visual diff → iterate）做像素级 1:1 复刻。
 
 ## 内容清单
@@ -20,7 +20,6 @@
 | 仓库 | 角色 | 安装 |
 | --- | --- | --- |
 | [`opencode-codex-guardrails`](https://github.com/Yulimfish/opencode-codex-guardrails) | 插件 · 安全 | `npm i opencode-codex-guardrails` |
-| [`opencode-codex-doubao-shim`](https://github.com/Yulimfish/opencode-codex-doubao-shim) | 插件 · embedding 代理 | `npm i opencode-codex-doubao-shim` |
 | [`@yulimfish/opencode-tool-search`](https://github.com/Yulimfish/opencode-tool-search) | 插件 · 动态工具加载 | `npm i @yulimfish/opencode-tool-search` |
 | [`opencode-skill-clarify-before-act`](https://github.com/Yulimfish/opencode-skill-clarify-before-act) | 技能 | git clone |
 | [`opencode-skill-ui-preview-first`](https://github.com/Yulimfish/opencode-skill-ui-preview-first) | 技能 | git clone |
@@ -31,7 +30,7 @@
 | [`opencode-skill-swarm-cluster`](https://github.com/Yulimfish/opencode-skill-swarm-cluster) | 技能 · 集群 | git clone |
 | [`opencode-skill-post-task-audit`](https://github.com/Yulimfish/opencode-skill-post-task-audit) | 技能 · 核查 | git clone |
 | [`opencode-skill-screenshot-to-ui`](https://github.com/Yulimfish/opencode-skill-screenshot-to-ui) | 技能 · 1:1 UI 复刻 | git clone |
-| [`opencode-swarm-agents`](https://github.com/Yulimfish/opencode-swarm-agents) | Agent 集 · 5 worker + 1 synth + 1 auditor | git clone → agents/ |
+| [`opencode-swarm-agents`](https://github.com/Yulimfish/opencode-swarm-agents) | Agent 集 · worker + synth + auditor | git clone → agents/ |
 
 ## 一行安装
 
@@ -41,12 +40,11 @@ curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/i
 
 脚本会：
 
-1. 检查前置（opencode、bun、npm）。
+1. 检查前置（opencode、npm）。
 2. 把 9 个技能 clone 到 `~/.config/opencode/skills/`。
-3. 把 opencode-swarm-agents clone 出来，把里面的 7 个 agent md 复制到 `~/.config/opencode/agents/`（装完需要重启一次 opencode 让 Task 白名单识别）。
-4. 把两个插件 `npm install` 到 `~/.config/opencode/`。
+3. 把 opencode-swarm-agents clone 出来，把里面的 3 个 agent md 复制到 `~/.config/opencode/agents/`（装完需要重启一次 opencode 让 Task 白名单识别）。
+4. 把插件 `npm install` 到 `~/.config/opencode/`。
 5. 打印你需要粘到 `opencode.jsonc` / `opencode-mem.jsonc` 的确切片段。
-6. 如果你打算用 doubao shim，提醒你设置 `ARK_KEY`。
 
 **全流程幂等** —— 反复跑没关系。
 
@@ -56,7 +54,7 @@ curl -fsSL https://raw.githubusercontent.com/Yulimfish/opencode-codex-kit/main/i
 
 ```bash
 # 插件
-npm install opencode-codex-guardrails opencode-codex-doubao-shim @yulimfish/opencode-tool-search
+npm install opencode-codex-guardrails @yulimfish/opencode-tool-search
 
 # 技能
 mkdir -p ~/.config/opencode/skills
@@ -67,10 +65,10 @@ for s in clarify-before-act ui-preview-first long-term-memory \
     "$HOME/.config/opencode/skills/$s"
 done
 
-# Agent bundle：5 个 worker + 1 个 synth + 1 个审计员的 md 定义（可选，供 swarm-cluster / post-task-audit 用）
+# Agent bundle：worker + synth + 审计员的 md 定义（可选，供 swarm-cluster / post-task-audit 用）
 mkdir -p ~/.config/opencode/agents
 git clone --depth=1 https://github.com/Yulimfish/opencode-swarm-agents.git /tmp/swarm-agents \
-  && cp /tmp/swarm-agents/agent/*.md ~/.config/opencode/agents/ \
+  && cp /tmp/swarm-agents/agents/*.md ~/.config/opencode/agents/ \
   && rm -rf /tmp/swarm-agents
 ```
 
@@ -80,26 +78,27 @@ git clone --depth=1 https://github.com/Yulimfish/opencode-swarm-agents.git /tmp/
 {
   "plugin": [
     "opencode-codex-guardrails",
-    "opencode-codex-doubao-shim",
     "@yulimfish/opencode-tool-search",
     "opencode-mem"
   ]
 }
 ```
 
-导出方舟 key：
+再编辑 `~/.config/opencode/opencode-mem.jsonc`，接上 embedding 后端：
 
-```bash
-export ARK_KEY="ark-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-xxxxx"
+```jsonc
+{
+  "embeddingApiUrl": "https://<your-endpoint>.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+  "embeddingApiKey": "<YOUR_API_KEY>",
+  "embeddingModel": "qwen3.7-text-embedding",
+  "embeddingDimensions": 1024
+}
 ```
-
-去 <https://console.volcengine.com/ark> 领。shim 需要它去连 `doubao-embedding-vision-250615`。
 
 ## 一屏截图看到的东西
 
 ```
 $ opencode
-[codex-doubao-shim] health OK at :4748
 [codex-guardrails] armed — 9 hard rules, 10 prompt rules, UI hint active
 [opencode-mem] loaded 42 memories, profile v3
 > 你好
@@ -118,9 +117,9 @@ Recalled 2 relevant memories （依据 memory mem_… · 2026-07-15）
 ## 设计目标
 
 1. **可组合。** 每一块都是独立仓库，各取所需。
-2. **零魔法。** ~180 行的 guardrails、~80 行的 shim、纯 markdown 的技能。装之前先读源码。
+2. **零魔法。** ~180 行的 guardrails、纯 markdown 的技能。装之前先读源码。
 3. **可挽回。** 破坏性动作要么被拦要么弹提示，事件全部落日志。
-4. **快。** 热路径没有阻塞网络调用，embedding shim 全在 localhost，技能懒加载。
+4. **快。** 技能懒加载，插件小体量；记忆检索按需触发（一次 embedding ~200–300ms）。
 
 ## 卸载
 
