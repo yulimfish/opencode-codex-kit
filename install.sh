@@ -16,6 +16,7 @@ SKILLS_DIR="$CFG_DIR/skills"
 AGENTS_DIR="$CFG_DIR/agents"
 MANAGED_MANIFEST="$CFG_DIR/.opencode-codex-kit-managed"
 SKILL_MANIFEST="$CFG_DIR/.opencode-codex-kit-skills"
+PLUGIN_MANIFEST="$CFG_DIR/.opencode-codex-kit-plugins"
 GH_USER="Yulimfish"
 
 SKILLS=(
@@ -68,7 +69,7 @@ install_managed() {
 # --- dirs ----------------------------------------------------------------
 say "preparing $CFG_DIR"
 mkdir -p "$SKILLS_DIR" "$AGENTS_DIR"
-touch "$MANAGED_MANIFEST" "$SKILL_MANIFEST"
+touch "$MANAGED_MANIFEST" "$SKILL_MANIFEST" "$PLUGIN_MANIFEST"
 ok "config dir ready"
 
 # --- skills --------------------------------------------------------------
@@ -130,6 +131,11 @@ if [[ ! -f package.json ]]; then
   # opencode plugins are loaded by string ID; type=module makes ESM plugins work.
   node -e 'const f="package.json";const p=require("./"+f);p.type="module";require("fs").writeFileSync(f,JSON.stringify(p,null,2))'
 fi
+for plugin in "${PLUGINS[@]}"; do
+  if ! npm ls --depth=0 "$plugin" >/dev/null 2>&1; then
+    printf '%s\n' "$plugin" >> "$PLUGIN_MANIFEST"
+  fi
+done
 npm install --silent "${PLUGINS[@]}"
 ok "plugins installed"
 
